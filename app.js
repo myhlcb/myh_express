@@ -1,13 +1,36 @@
-var createError = require ('http-errors');
-var express = require ('express');
-var path = require ('path');
-var cookieParser = require ('cookie-parser');
-var logger = require ('morgan');
+const createError = require ('http-errors');
+const express = require ('express');
+require ('express-async-errors');
+const path = require ('path');
+const cookieParser = require ('cookie-parser');
+const logger = require ('morgan');
+const router = require ('./app/router');
 
-var indexRouter = require ('./routes/index');
-var usersRouter = require ('./routes/users');
+const app = express ();
+const session = require ('express-session');
 
-var app = express ();
+const redis = require ('ioredis');
+
+const RedisStore = require ('connect-redis') (session);
+const client = redis.createClient ();
+const swaggerUi = require ('swagger-ui-express');
+const swaggerDocument = require ('./swagger.json');
+
+app.use ('/swagger', swaggerUi.serve, swaggerUi.setup (swaggerDocument));
+app.use (
+  session ({
+    name: 'myh',
+    secret: 'myh_express_test',
+    store: new RedisStore ({client}),
+    saveUninitialized: false,
+    resave: false,
+
+    cookie: {
+      secure: false, //default false
+      maxAge: 24 * 3600 * 1000,
+    },
+  })
+);
 
 // view engine setup
 app.set ('views', path.join (__dirname, 'views'));
@@ -19,9 +42,16 @@ app.use (express.urlencoded ({extended: false}));
 app.use (cookieParser ());
 app.use (express.static (path.join (__dirname, 'public')));
 
-app.use ('/', indexRouter);
-app.use ('/users', usersRouter);
-
+app.use ('/v1', router);
+//跨域访问
+app.all ('*', function (req, res, next) {
+  res.header ('Access-Control-Allow-Origin', '*');
+  res.header ('Access-Control-Allow-Headers', 'X-Requested-With');
+  res.header ('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
+  res.header ('X-Powered-By', ' 3.2.1');
+  res.header ('Content-Type', 'application/json;charset=utf-8');
+  next ();
+});
 // catch 404 and forward to error handler
 app.use (function (req, res, next) {
   next (createError (404));
@@ -29,15 +59,12 @@ app.use (function (req, res, next) {
 
 // error handler
 app.use (function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get ('env') === 'development' ? err : {};
-
   // render the error page
+  console.log (err.stack, 11111);
   res.status (err.status || 500);
-  res.render ('error');
+  res.send (err.stack);
 });
-app.listen (3000, () => {
-  console.log ('goo');
+app.listen (3007, () => {
+  console.log ('3007 gooooooooooooooooooo');
 });
 module.exports = app;
