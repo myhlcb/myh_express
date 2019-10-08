@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "start": "nodemon app.js",
-    "test": "ava"
+    "test": "ava",
+    "server":"http-server ./public -p 3021"
   },
   "dependencies": {
+    "connect-redis": "^4.0.3",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "~4.16.1",
@@ -18,13 +20,15 @@
     "moment": "^2.24.0",
     "mongoose": "^5.7.1",
     "morgan": "~1.9.1",
+    "mysql": "^2.17.1",
     "pg": "^7.12.1",
     "pg-hstore": "^2.3.3",
     "sequelize": "^5.19.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "ava": "^2.4.0"
+    "ava": "^2.4.0",
+    "swagger-ui-express": "^4.1.2"
   },
   "ava": {
     "files": [
